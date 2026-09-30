@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" />
+  <title>迷你专注窗</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; height: 100%;
+      background: transparent;
+      overflow: hidden;
+      font: 13px/1.4 "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      color: #e9eef8;
+      user-select: none;
+    }
+    .mini {
+      height: 100%;
+      display: flex; flex-direction: column; justify-content: center; gap: 4px;
+      padding: 10px 14px;
+      background: linear-gradient(150deg, rgba(26, 34, 51, 0.96), rgba(18, 24, 37, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+      -webkit-app-region: drag;
+      cursor: move;
+    }
+    .mini.is-break { border-color: rgba(53, 192, 138, 0.45); }
+    .mini.is-paused { border-color: rgba(242, 201, 76, 0.45); }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .tag {
+      font-size: 12.5px; color: #94a3b8;
+      max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #f4794f; flex: 0 0 auto; }
+    .mini.is-break .dot { background: #35c08a; }
+    .mini.is-paused .dot { background: #f2c94c; }
+    .time {
+      font-size: 27px; font-weight: 700; letter-spacing: 0.5px;
+      font-variant-numeric: tabular-nums; line-height: 1.1;
+    }
+    .bar { height: 4px; border-radius: 3px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+    .bar i { display: block; height: 100%; width: 0; background: #f4794f; transition: width 0.3s linear; }
+    .mini.is-break .bar i { background: #35c08a; }
+    .mini.is-paused .bar i { background: #f2c94c; }
+    .btns { display: flex; gap: 6px; -webkit-app-region: no-drag; }
+    button {
+      flex: 1; border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.06); color: #e9eef8;
+      border-radius: 7px; padding: 4px 0; font: inherit; font-size: 12px; cursor: pointer;
+    }
+    button:hover { background: rgba(255, 255, 255, 0.13); }
+    button.primary { background: rgba(244, 121, 79, 0.85); border-color: transparent; color: #fff; font-weight: 600; }
+    button.primary:hover { background: rgba(244, 121, 79, 1); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="mini" id="mini">
+    <div class="row">
+      <i class="dot"></i>
+      <span class="tag" id="tag">未选择主题</span>
+      <span class="tag" id="state" style="margin-left:auto;font-size:11px"></span>
+    </div>
+    <div class="time" id="time">25:00</div>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="btns">
+      <button id="btnToggle" class="primary">开始</button>
+      <button id="btnFinish">结束</button>
+      <button id="btnOpen">主窗</button>
+    </div>
+  </div>
+  <script src="mini.js"></script>
+</body>
+</html>

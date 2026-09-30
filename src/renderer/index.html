@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' data:" />
+  <title>专注器</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <div class="brand-name">专注器</div>
+          <div class="brand-sub">Focus Timer</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item is-active" data-page="focus">
+          <span class="nav-ico">◎</span><span>专注</span>
+        </button>
+        <button class="nav-item" data-page="stats">
+          <span class="nav-ico">▤</span><span>统计看板</span>
+        </button>
+        <button class="nav-item" data-page="history">
+          <span class="nav-ico">≡</span><span>记录明细</span>
+        </button>
+        <button class="nav-item" data-page="settings">
+          <span class="nav-ico">⚙</span><span>设置</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="today-mini">
+          <div class="today-mini-label">今日专注</div>
+          <div class="today-mini-value" id="sideToday">0m</div>
+          <div class="today-mini-sub" id="sideTodaySub">0 个番茄</div>
+        </div>
+        <div class="mini-actions">
+          <button class="btn btn-ghost btn-sm" id="btnMini">迷你悬浮窗</button>
+          <button class="btn btn-ghost btn-sm" id="btnQuit">退出</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- ============================ 专注 ============================ -->
+      <section class="page is-active" data-page="focus">
+        <div class="focus-wrap">
+          <div class="ring-wrap">
+            <svg class="ring" viewBox="0 0 240 240">
+              <circle class="ring-track" cx="120" cy="120" r="106" />
+              <circle class="ring-progress" id="ringProgress" cx="120" cy="120" r="106" />
+            </svg>
+            <div class="ring-center">
+              <div class="ring-tag" id="ringTag">未选择主题</div>
+              <div class="ring-time" id="ringTime">25:00</div>
+              <div class="ring-state" id="ringState">准备开始</div>
+            </div>
+          </div>
+
+          <div class="focus-actions">
+            <button class="btn btn-primary btn-lg" id="btnPrimary">开始专注</button>
+            <button class="btn btn-warn" id="btnFinish" disabled>提前结束</button>
+            <button class="btn btn-danger" id="btnAbandon" disabled>放弃本次</button>
+            <button class="btn btn-ghost" id="btnReset" disabled>重置</button>
+          </div>
+
+          <div class="focus-meta" id="focusMeta"></div>
+
+          <div class="quick-start">
+            <div class="quick-head">
+              <span>快速开始（点击标签直接进入）</span>
+              <span class="quick-dur" id="quickDurWrap"></span>
+            </div>
+            <div class="chip-row" id="quickTags"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ 统计 ============================ -->
+      <section class="page" data-page="stats">
+        <div class="page-head">
+          <h2>统计看板</h2>
+          <div class="page-head-actions">
+            <button class="btn btn-ghost btn-sm" id="btnExport">导出 CSV</button>
+            <button class="btn btn-ghost btn-sm" id="btnRefresh">刷新</button>
+          </div>
+        </div>
+
+        <div class="cards">
+          <div class="card stat">
+            <div class="stat-label">今日总学习时长</div>
+            <div class="stat-value" id="kpiToday">—</div>
+            <div class="stat-sub" id="kpiTodaySub"></div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">今日番茄数</div>
+            <div class="stat-value" id="kpiPomodoro">—</div>
+            <div class="stat-sub" id="kpiPomodoroSub"></div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">连续天数</div>
+            <div class="stat-value" id="kpiStreak">—</div>
+            <div class="stat-sub" id="kpiStreakSub">有记录即算一天</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">累计专注</div>
+            <div class="stat-value" id="kpiTotal">—</div>
+            <div class="stat-sub" id="kpiTotalSub"></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h3>今日各标签时长</h3>
+              <span class="muted" id="todayTagHint"></span>
+            </div>
+            <div class="tag-bars" id="todayTagBars"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>最近 7 天</h3>
+              <span class="muted">按天汇总总时长</span>
+            </div>
+            <div class="bars7" id="bars7"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>趋势</h3>
+            <div class="seg" id="trendSeg">
+              <button class="seg-item is-active" data-days="7">7 天</button>
+              <button class="seg-item" data-days="30">30 天</button>
+              <button class="seg-item" data-days="90">90 天</button>
+            </div>
+          </div>
+          <div class="trend" id="trend"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>日历热力图</h3>
+            <div class="heat-nav">
+              <button class="btn btn-ghost btn-xs" id="heatPrev">‹</button>
+              <span id="heatTitle" class="muted"></span>
+              <button class="btn btn-ghost btn-xs" id="heatNext">›</button>
+            </div>
+          </div>
+          <div class="heatmap" id="heatmap"></div>
+          <div class="heat-legend">
+            <span class="muted">少</span>
+            <i class="hl" data-lv="0"></i><i class="hl" data-lv="1"></i><i class="hl" data-lv="2"></i>
+            <i class="hl" data-lv="3"></i><i class="hl" data-lv="4"></i>
+            <span class="muted">多</span>
+            <span class="muted" id="heatTip">点击某天查看当天标签构成</span>
+          </div>
+          <div class="heat-detail" id="heatDetail"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>全部标签累计</h3>
+            <span class="muted">点击标签查看历史</span>
+          </div>
+          <div class="tag-table" id="tagTable"></div>
+        </div>
+      </section>
+
+      <!-- ============================ 明细 ============================ -->
+      <section class="page" data-page="history">
+        <div class="page-head">
+          <h2 id="histTitle">记录明细</h2>
+          <div class="page-head-actions">
+            <select class="input" id="histRange">
+              <option value="today">今天</option>
+              <option value="7">最近 7 天</option>
+              <option value="30" selected>最近 30 天</option>
+              <option value="all">全部</option>
+            </select>
+            <select class="input" id="histTag"><option value="">全部标签</option></select>
+            <button class="btn btn-ghost btn-sm" id="btnExport2">导出 CSV</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="table" id="histTable">
+              <thead>
+                <tr>
+                  <th>日期</th><th>标签</th><th>开始</th><th>结束</th>
+                  <th>计划</th><th>实际</th><th>状态</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="muted table-foot" id="histFoot"></div>
+        </div>
+      </section>
+
+      <!-- ============================ 设置 ============================ -->
+      <section class="page" data-page="settings">
+        <div class="page-head"><h2>设置</h2></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h3>时长</h3></div>
+            <label class="field"><span>专注时长（分钟）</span>
+              <input class="input" type="number" min="1" max="180" id="setFocus" /></label>
+            <label class="field"><span>短休息（分钟）</span>
+              <input class="input" type="number" min="0" max="60" id="setShort" /></label>
+            <label class="field"><span>长休息（分钟）</span>
+              <input class="input" type="number" min="0" max="120" id="setLong" /></label>
+            <label class="field"><span>每几个番茄进入长休息</span>
+              <input class="input" type="number" min="0" max="12" id="setLongEvery" /></label>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>行为</h3></div>
+            <label class="check"><input type="checkbox" id="setAutoBreak" /><span>专注结束后自动开始休息</span></label>
+            <label class="check"><input type="checkbox" id="setSound" /><span>结束提示音</span></label>
+            <label class="field"><span>提示音音量</span>
+              <input type="range" min="0" max="1" step="0.05" id="setVolume" /></label>
+            <label class="check"><input type="checkbox" id="setNotify" /><span>系统通知</span></label>
+            <label class="check"><input type="checkbox" id="setTray" /><span>关闭主窗口时收进托盘继续计时</span></label>
+            <label class="check"><input type="checkbox" id="setMiniTop" /><span>迷你悬浮窗置顶</span></label>
+            <label class="check"><input type="checkbox" id="setPartial" /><span>提前结束也计入番茄数</span></label>
+
+            <div class="field">
+              <span>「放弃」的时长如何统计</span>
+              <div class="radio-row">
+                <label class="radio"><input type="radio" name="abandon" value="counted" /><span>计入总时长，单独标记</span></label>
+                <label class="radio"><input type="radio" name="abandon" value="excluded" /><span>完全不计入</span></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>全局快捷键</h3></div>
+            <div class="muted">在任何程序里都能用；若被其它软件占用会注册失败。</div>
+            <label class="field"><span>开始 / 暂停 / 继续</span>
+              <input class="input" id="setScToggle" placeholder="Control+Alt+F" /></label>
+            <label class="field"><span>显示 / 隐藏迷你窗</span>
+              <input class="input" id="setScMini" placeholder="Control+Alt+M" /></label>
+            <button class="btn btn-primary btn-sm" id="btnSaveSc">保存快捷键</button>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>关于 / 数据</h3></div>
+            <div class="kv" id="aboutBox"></div>
+            <div class="row-gap">
+              <button class="btn btn-ghost btn-sm" id="btnOpenFolder">打开数据文件夹</button>
+              <button class="btn btn-primary btn-sm" id="btnSaveSettings">保存设置</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============================ 标签选择弹窗 ============================ -->
+  <div class="modal-mask" id="pickerMask" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+      <div class="modal-head">
+        <h3 id="pickerTitle">选择本次专注的主题</h3>
+        <button class="icon-btn" id="pickerClose" title="关闭">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-section">
+          <div class="modal-label">预设标签</div>
+          <div class="chip-row" id="presetTags"></div>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-label">自定义标签</div>
+          <div class="chip-row" id="customTags"></div>
+          <div class="inline-add">
+            <input class="input" id="newTagInput" placeholder="输入新标签，例如：练吉他" maxlength="24" />
+            <button class="btn btn-ghost btn-sm" id="addTagBtn">添加</button>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-label">本次时长</div>
+          <div class="chip-row" id="durChips">
+            <button class="chip" data-min="15">15 分钟</button>
+            <button class="chip is-active" data-min="25">25 分钟</button>
+            <button class="chip" data-min="45">45 分钟</button>
+            <button class="chip" data-min="60">60 分钟</button>
+          </div>
+          <div class="inline-add">
+            <input class="input" type="number" id="durCustom" min="1" max="180" placeholder="自定义分钟" />
+            <span class="muted">留空则用默认 25 分钟</span>
+          </div>
+        </div>
+
+        <div class="picked-line">
+          已选：<b id="pickedTag">—</b>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-ghost" id="pickerCancel">取消</button>
+        <button class="btn btn-primary" id="pickerStart" disabled>开始专注</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+  <script src="renderer.js"></script>
+</body>
+</html>
